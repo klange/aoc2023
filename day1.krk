@@ -1,0 +1,26 @@
+from aoc import lines
+
+if True:
+    let sum = 0
+    for i in lines:
+        let digits = ''
+        for c in i:
+            if c in '0123456789':
+                digits += c
+        sum += int(digits[0]+digits[-1])
+    print(sum)
+
+if True:
+    let sum = 0
+    for i in lines:
+        let digits = ''
+        for c in range(len(i)):
+            if i[c] in '0123456789':
+                digits += i[c]
+            else:
+                for v, a in enumerate(['one','two','three','four','five','six','seven','eight','nine']):
+                    if i[c:len(a)+c] == a:
+                        digits += str(v+1)
+        sum += int(digits[0]+digits[-1])
+
+    print(sum)
