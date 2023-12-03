@@ -1,0 +1,66 @@
+from aoc import lines
+
+let field = {}
+for r in range(len(lines)):
+    for c in range(len(lines[r])):
+        field[r,c] = lines[r][c]
+
+def touches(r,c):
+    for y,x in ((-1,-1),(-1,0),(-1,1),
+                (0,-1),(0,1),
+                (1,-1),(1,0),(1,1)):
+        if field.get((r+y,c+x),'.') not in '.1234567890':
+            return True
+    return False
+
+let nums = {}
+
+class Num:
+    def __init__(self,a):
+        self.a = a
+        self.t = False
+    def append(self,a):
+        self.a += a
+
+for r in range(len(lines)):
+    for c in range(len(lines[r])):
+        if (r,c) in nums:
+            continue
+        if field[r,c] in '0123456789':
+            let n = Num(field[r,c])
+            nums[r,c] = n
+            n.t |= touches(r,c)
+            for x in range(c+1,len(lines[r])):
+                if field[r,x] in '0123456789':
+                    n.append(field[r,x])
+                    n.t |= touches(r,x)
+                    nums[r,x] = n
+                else:
+                    break
+
+let s = 0
+for num in set(nums.values()):
+    if num.t:
+        s += int(num.a)
+print(s)
+
+def neighbors(r,c):
+    let s = set()
+    for y,x in ((-1,-1),(-1,0),(-1,1),
+                (0,-1),(0,1),
+                (1,-1),(1,0),(1,1)):
+        let n = nums.get((r+y,c+x),None)
+        if n is not None and n not in s:
+            s.add(n)
+    return s
+
+s = 0
+for r in range(len(lines)):
+    for c in range(len(lines[r])):
+        if field[r,c] == '*':
+            let n = neighbors(r,c)
+            if len(n) == 2:
+                let x = list(n)
+                s += int(x[0].a) * int(x[1].a)
+
+print(s)
