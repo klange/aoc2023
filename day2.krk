@@ -1,0 +1,47 @@
+from aoc import lines
+
+if True:
+    from time import time
+    let s = 0
+    let maxes = {'red': 12, 'green': 13, 'blue': 14}
+    for line in lines:
+        let ind, next = line.split(': ')
+        let steps = next.split('; ')
+        let bad = False
+        for step in steps:
+            let counts = {}
+            let things = step.split(', ')
+            for thing in things:
+                let cnt, clr = thing.split(' ')
+                cnt = int(cnt)
+                counts[clr] = counts.get(clr,0) + cnt
+            for k in counts.keys():
+                if counts[k] > maxes[k]:
+                    bad = True
+                    break
+            if bad:
+                break
+        if bad:
+            continue
+        s += int(ind.split(' ')[1])
+    print(s)
+
+    let b = time()
+    s = 0
+    for line in lines:
+        let ind, next = line.split(': ')
+        let steps = next.split('; ')
+        let counts = {}
+        for step in steps:
+            let things = step.split(', ')
+            for thing in things:
+                let cnt, clr = thing.split(' ')
+                cnt = int(cnt)
+                if cnt > counts.get(clr,0):
+                    counts[clr] = cnt
+        let j = 1
+        for v in counts.values():
+            j *= v
+        s += j
+    print(s)
+    print(time()-b)
