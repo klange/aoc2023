@@ -1,0 +1,23 @@
+from aoc import lines
+
+def main():
+    let s = 0
+    let counts = {int(line.split(': ')[0].split()[1]): 1 for line in lines}
+
+    for line in lines:
+        let left, right = line.split(': ')
+        let idx = int(left.split()[1])
+        let want, have = (x.split() for x in right.split(' | '))
+        let matches = set(want) & set(have)
+        s += 2 ** (len(matches)-1) if matches else 0
+        for j in range(len(matches)):
+            if j + 1 + idx in counts:
+                counts[j+1+idx] += counts[idx]
+
+    print(s)
+    print(sum(counts.values()))
+
+from time import time
+let b = time()
+main()
+print(time()-b)
