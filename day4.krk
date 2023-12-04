@@ -9,7 +9,7 @@ def main():
         let idx = int(left.split()[1])
         let want, have = (x.split() for x in right.split(' | '))
         let matches = set(want) & set(have)
-        s += 2 ** (len(matches)-1) if matches else 0
+        s += 1 << (len(matches)-1) if matches else 0
         for j in range(len(matches)):
             if j + 1 + idx in counts:
                 counts[j+1+idx] += counts[idx]
