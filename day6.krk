@@ -1,0 +1,32 @@
+from aoc import lines
+
+def main():
+    let time = [int(x) for x in lines[0].split()[1:]]
+    let dist = [int(x) for x in lines[1].split()[1:]]
+
+    let x = 1
+    for i in range(len(time)):
+        let w = 0
+        for j in range(time[i]):
+            let avail = time[i] - j
+            if avail * j > dist[i]:
+                w += 1
+        x *= w
+
+    print(x)
+
+def main2():
+    let time = int(lines[0].split(':')[1].replace(' ',''))
+    let dist = int(lines[1].split(':')[1].replace(' ',''))
+
+    let w = 0
+    for j in range(time):
+        let avail = time - j
+        if avail * j > dist:
+            w += 1
+
+    print(w)
+
+
+main()
+main2()
