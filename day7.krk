@@ -1,0 +1,189 @@
+from aoc import lines
+
+def main():
+    let values = {
+        '2': 2,
+        '3': 3,
+        '4': 4,
+        '5': 5,
+        '6': 6,
+        '7': 7,
+        '8': 8,
+        '9': 9,
+        'T': 10,
+        'J': 11,
+        'Q': 12,
+        'K': 13,
+        'A': 14
+    }
+    def classify(hand):
+        let counts = {}
+        for c in hand:
+            counts[c] = counts.get(c,0) + 1
+        if any(v == 5 for v in counts.values()):
+            return 5
+        if any(v == 4 for v in counts.values()):
+            return 4
+        if any(v == 3 for v in counts.values()) and any(v == 2 for v in counts.values()):
+            return 3
+        if any(v == 3 for v in counts.values()):
+            return 2
+        if len(list(v for v in counts.values() if v == 2)) == 2:
+            return 1
+        if any(v == 2 for v in counts.values()):
+            return 0
+        return -1
+
+    class Bet:
+        def __init__(self, hand, bet):
+            self.hand = hand
+            self.bet = int(bet)
+
+        def __repr__(self):
+            return f'Bet(hand={self.hand}, bet={self.bet})'
+        def __str__(self):
+            return repr(self)
+
+        def __lt__(self, other):
+            if classify(self.hand) < classify(other.hand):
+                return True
+            if classify(self.hand) > classify(other.hand):
+                return False
+            for c in range(len(self.hand)):
+                if values[self.hand[c]] < values[other.hand[c]]:
+                    return True
+                if values[self.hand[c]] > values[other.hand[c]]:
+                    return False
+            return False
+
+        def __gt__(self, other):
+            if classify(self.hand) > classify(other.hand):
+                return True
+            if classify(self.hand) < classify(other.hand):
+                return False
+            for c in range(len(self.hand)):
+                if values[self.hand[c]] > values[other.hand[c]]:
+                    return True
+                if values[self.hand[c]] < values[other.hand[c]]:
+                    return False
+            return False
+
+        def __eq__(self, other):
+            return classify(self.hand) == classify(other.hand) and self.hand == other.hand
+
+    let bets = []
+    for line in lines:
+        let bet = Bet(*line.split())
+        bets.append(bet)
+
+    bets = sorted(bets)
+    let t = 0
+    for j in range(len(bets)):
+        t += bets[j].bet * (j + 1)
+
+    print(t)
+
+def part2():
+    let values = {
+        'J': 1,
+        '2': 2,
+        '3': 3,
+        '4': 4,
+        '5': 5,
+        '6': 6,
+        '7': 7,
+        '8': 8,
+        '9': 9,
+        'T': 10,
+        'Q': 12,
+        'K': 13,
+        'A': 14
+    }
+    let names = {
+        5: 'five of a kind',
+        4: 'four of a kind',
+        3: 'full house',
+        2: 'three of a kind',
+        1: 'two pair',
+        0: 'one pair',
+        -1: 'high card',
+    }
+    def classify_int(hand):
+        let counts = {}
+        for c in hand:
+            counts[c] = counts.get(c,0) + 1
+        if any(v == 5 for v in counts.values()):
+            return 5
+        if any(v == 4 for v in counts.values()):
+            return 4
+        if any(v == 3 for v in counts.values()) and any(v == 2 for v in counts.values()):
+            return 3
+        if any(v == 3 for v in counts.values()):
+            return 2
+        if len(list(v for v in counts.values() if v == 2)) == 2:
+            return 1
+        if any(v == 2 for v in counts.values()):
+            return 0
+        return -1
+
+    def classify(hand):
+        if 'J' not in hand:
+            return classify_int(hand)
+
+        let m = 0
+        for x in '23456789QATK':
+            let h = hand.replace('J',x)
+            let c = classify_int(h)
+            if c > m:
+                m = c
+        return m
+
+    class Bet:
+        def __init__(self, hand, bet):
+            self.hand = hand
+            self.bet = int(bet)
+            self.c = classify(hand)
+
+        def __repr__(self):
+            return f'Bet(hand={self.hand}, bet={self.bet}, c={names[self.c]})'
+        def __str__(self):
+            return repr(self)
+
+        def __lt__(self, other):
+            if self.c < other.c: return True
+            if self.c > other.c: return False
+            for c in range(len(self.hand)):
+                if values[self.hand[c]] < values[other.hand[c]]:
+                    return True
+                if values[self.hand[c]] > values[other.hand[c]]:
+                    return False
+            return False
+
+        def __gt__(self, other):
+            if self.c > other.c: return True
+            if self.c < other.c: return False
+            for c in range(len(self.hand)):
+                if values[self.hand[c]] > values[other.hand[c]]:
+                    return True
+                if values[self.hand[c]] < values[other.hand[c]]:
+                    return False
+            return False
+
+        def __eq__(self, other):
+            return self.c == other.c and self.hand == other.hand
+
+    let bets = []
+    for line in lines:
+        let bet = Bet(*line.split())
+        bets.append(bet)
+
+    bets = sorted(bets)
+    let t = 0
+    for j in range(len(bets)):
+        t += bets[j].bet * (j + 1)
+        print(bets[j])
+
+    print(t)
+
+
+part2()
