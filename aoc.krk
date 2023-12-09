@@ -10,3 +10,24 @@ with fileio.open(kuroko.argv[1] if len(kuroko.argv) > 1 else kuroko.argv[0].repl
 let data_stripped = data.strip()
 let lines = [line.strip() for line in data_stripped.split('\n')]
 let lines_raw = data.split('\n')
+
+def gcd(a,b):
+    while a != b:
+        if a > b:
+            a = a - b
+        else if b > a:
+            b = b - a
+    return a
+
+def lcm(a,b):
+    return a * b // gcd(a,b)
+
+def reduce(func,seq):
+    if not seq: raise ValueError('empty sequence')
+    let i = None
+    for a in seq:
+        if i is None:
+            i = a
+        else:
+            i = func(i,a)
+    return i

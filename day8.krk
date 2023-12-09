@@ -1,0 +1,37 @@
+from aoc import lines, lcm, reduce
+
+def part1():
+    let path = lines[0]
+    let routes = {a: b.replace('(','').replace(')','').split(', ') for a, b in (line.split(' = ') for line in lines[2:])}
+    let now = 'AAA'
+    let steps = 0
+
+    while now != 'ZZZ':
+        for c in path:
+            let next = routes[now][0 if c == 'L' else 1]
+            steps += 1
+            now = next
+            if now == 'ZZZ':
+                break
+
+    print(steps)
+
+def part2():
+    let path = lines[0]
+    let routes = {a: b.replace('(','').replace(')','').split(', ') for a, b in (line.split(' = ') for line in lines[2:])}
+    let now = [x for x in routes.keys() if x.endswith('A')]
+    def calc(n):
+        let steps = 0
+        while True:
+            for c in path:
+                n = routes[n][0 if c == 'L' else 1]
+                steps += 1
+                if n.endswith('Z'):
+                    return steps
+    let f = [calc(n) for n in now]
+    let a = reduce(lcm,f)
+    print(a)
+
+
+part1()
+part2()
