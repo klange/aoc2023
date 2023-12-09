@@ -1,0 +1,28 @@
+from aoc import lines
+
+def main(o,d):
+    let t = 0
+    for line in lines:
+        let b = [int(x) for x in line.split()]
+        let last = [b[o]]
+        while True:
+            let d = b[0]
+            let ds = []
+            let z = True
+            for i in b[1:]:
+                let x = i-d
+                ds.append(x)
+                z = z and (x == 0)
+                d=i
+            if z: break
+            last.append(ds[o])
+            b = ds
+        let n = 0
+        for x in last[::-1]:
+            n = x + n * d
+        t += n
+    print(t)
+
+main(-1,1)
+main(0,-1)
+
