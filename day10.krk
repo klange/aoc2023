@@ -60,12 +60,12 @@ def main():
     print(len(in_loop)//2)
 
     let fancy = {
-        'L':'╰─',
-        '7':'╮ ',
+        'L':'└─',
+        '7':'┐ ',
         '|':'│ ',
         '-':'──',
-        'F':'╭─',
-        'J':'╯ ',
+        'F':'┌─',
+        'J':'┘ ',
         'S':'SS',
         '.':'. ',
     }
@@ -80,7 +80,7 @@ def main():
             if (y,x) in in_loop:
                 if i in ('L|J'): # We only scan the top half, so ignore F and 7 and -
                     s = not s    # and flip only vertical edges from the top half.
-                f = 31 if i == 'S' else 32
+                f = 33 if i == 'S' else 32
             else if s: # Area enclosed by the pipe.
                 count += 1
                 f = 31
