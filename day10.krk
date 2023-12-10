@@ -1,0 +1,90 @@
+from aoc import lines as world
+
+def part1():
+    let start
+    for y in range(len(world)):
+        for x in range(len(world[y])):
+            if world[y][x] == 'S':
+                start = y,x
+                break
+
+    let c = start
+    let n = start[0],start[1]-1
+    let in_loop = set()
+
+    def move(c_y,c_x,n_y,n_x):
+        let t = world[n_y][n_x]
+        if t == 'L':      # Right or up
+            if c_y < n_y:
+                return n_y, n_x + 1
+            if c_x > n_x:
+                return n_y - 1, n_x
+        else if t == '|': # Up or down
+            if c_y > n_y:
+                return n_y - 1, n_x
+            if c_y < n_y:
+                return n_y + 1, n_x
+        else if t == '-': # Right or left
+            if c_x < n_x:
+                return n_y, n_x + 1
+            if c_x > n_x:
+                return n_y, n_x - 1
+        else if t == 'J': # Left or up
+            if c_y < n_y:
+                return n_y, n_x - 1
+            if c_x < n_x:
+                return n_y - 1, n_x
+        else if t == 'F': # Right or down
+            if c_y > n_y:
+                return n_y, n_x + 1
+            if c_x > n_x:
+                return n_y + 1, n_x
+        else if t == '7': # Left or down
+            if c_y > n_y:
+                return n_y, n_x - 1
+            if c_x < n_x:
+                return n_y + 1, n_x
+        else if t == 'S':
+            return None # Stop
+        raise ValueError(f"invalid pipe {t!r} {c!r} {n!r}")
+
+    # Walk the pipe.
+    while n is not None:
+        in_loop.add(c)
+        c, n = n, move(*c,*n)
+
+    # Half the length of the pipe.
+    print(len(in_loop)//2)
+
+    let fancy = {
+        'L':'╰─',
+        '7':'╮ ',
+        '|':'│ ',
+        '-':'──',
+        'F':'╭─',
+        'J':'╯ ',
+        'S':'SS',
+        '.':'. ',
+    }
+
+    # Scanline rasterizer goes brrrr
+    let count = 0
+    for y in range(len(world)):
+        let s = False
+        for x in range(len(world[y])):
+            let i = world[y][x]
+            let f = 0
+            if (y,x) in in_loop:
+                if i in ('L|J'): # We only scan the top half, so
+                    s = not s    # ignore F and 7 and -.
+                f = 31 if i == 'S' else 32
+            else if s: # Area enclosed by the pipe.
+                count += 1
+                f = 31
+            print(f'\[[1;{f}m{fancy[i]}\[[0m',end='')
+        print()
+
+    print(count)
+    pass
+
+part1()
