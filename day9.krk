@@ -1,10 +1,10 @@
 from aoc import lines
 
-def main(o,d):
+def main(d):
     let t = 0
     for line in lines:
-        let b = [int(x) for x in line.split()]
-        let last = [b[o]]
+        let b = [int(x) for x in line.split()][::d]
+        let last = [b[-1]]
         while True:
             let d = b[0]
             let ds = []
@@ -15,14 +15,14 @@ def main(o,d):
                 z = z and (x == 0)
                 d=i
             if z: break
-            last.append(ds[o])
+            last.append(ds[-1])
             b = ds
         let n = 0
         for x in last[::-1]:
-            n = x + n * d
+            n = x + n
         t += n
     print(t)
 
-main(-1,1)
-main(0,-1)
+main(1)
+main(-1)
 
