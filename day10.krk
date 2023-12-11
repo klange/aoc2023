@@ -78,8 +78,8 @@ def main():
             let i = world[y][x]
             let f = 0
             if (y,x) in in_loop:
-                if i in ('L|J'): # We only scan the top half, so ignore F and 7 and -
-                    s = not s    # and flip only vertical edges from the top half.
+                if i in 'L|J': # We only scan the top half, so ignore F and 7 and -
+                    s = not s  # and flip only vertical edges from the top half.
                 f = 33 if i == 'S' else 32
             else if s: # Area enclosed by the pipe.
                 count += 1
