@@ -1,22 +1,24 @@
 from aoc import lines
 
 def main(amount):
-    let row_costs = {r: amount if '#' not in lines[r] else 1 for r in range(len(lines))}
-    let col_costs = {c: amount if '#' not in [lines[r][c] for r in range(len(lines))] else 1 for c in range(len(lines[0]))}
+    let row_costs = {r: amount-1 if '#' not in lines[r] else 0 for r in range(len(lines))}
+    let col_costs = {c: amount-1 if '#' not in [lines[r][c] for r in range(len(lines))] else 0 for c in range(len(lines[0]))}
     let coords = []
+    let e_r = 0
     for r in range(len(lines)):
+        let e_c = 0
         for c in range(len(lines[r])):
             if lines[r][c] == '#':
-                coords.append((r,c))
-    let dists = {}
+                coords.append((r+e_r,c+e_c))
+            e_c += col_costs[c]
+        e_r += row_costs[r]
+    let d = 0
     for c in range(len(coords)):
         let c_y, c_x = coords[c]
-        for o in range(len(coords)):
-            if o == c or (o,c) in dists or (c,o) in dists: continue
+        for o in range(c+1,len(coords)):
             let o_y, o_x = coords[o]
-            dists[c,o] = sum(row_costs[y] for y in range(o_y if o_y < c_y else c_y, c_y if o_y < c_y else o_y)) + \
-                         sum(col_costs[x] for x in range(o_x if o_x < c_x else c_x, c_x if o_x < c_x else o_x))
-    print(sum(dists.values()))
+            d += abs(o_y-c_y) + abs(o_x-c_x)
+    print(d)
 
 main(2)
 main(1000000)
