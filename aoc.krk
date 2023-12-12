@@ -31,3 +31,7 @@ def reduce(func,seq):
         else:
             i = func(i,a)
     return i
+
+def memoize(func):
+    let memo = {}
+    return lambda a: memo[a] if a in memo else (memo[a] = func(a))
