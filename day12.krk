@@ -1,0 +1,72 @@
+from aoc import lines
+
+def do_main(a,b):
+    a = a.strip('.')
+    let groups = tuple(int(x) for x in b.split(','))
+
+    let memo = {}
+    let substr = a
+    def try_it(j, group_ind):
+        if (j,group_ind) in memo:
+            return memo[j,group_ind]
+
+        if group_ind == len(groups):
+            if '#' not in substr[j:]:
+                memo[j,group_ind] = 1
+                return 1
+            return 0
+
+        let p = 0
+        let i = j
+
+        let _count = 0
+        while i < len(substr):
+            if substr[i] == '#':
+                i++
+                p++
+            else if substr[i] == '.':
+                if p == 0:
+                    i++
+                    continue
+                if p == groups[group_ind]:
+                    let o = try_it(i+1,group_ind+1)
+                    memo[j,group_ind] = _count + o
+                    return _count + o
+                return _count
+            else if substr[i] == '?':
+                if p < groups[group_ind]:
+                    if p == 0:
+                        # Consider a dot here
+                        _count += try_it(i+1,group_ind)
+                    i++
+                    p++
+                else if p == groups[group_ind]:
+                    let o = try_it(i+1,group_ind+1)
+                    memo[j,group_ind] = _count + o
+                    return _count + o
+                else if p > groups[group_ind]:
+                    return _count
+        if p == groups[group_ind] and group_ind == len(groups) - 1:
+            return _count + 1
+        return _count
+    return try_it(0,0)
+
+def part1():
+    let total = 0
+    for line in lines:
+        let a, b = line.split()
+        total += do_main(a,b)
+    print(total)
+
+def part2():
+    let total = 0
+    for line in lines:
+        let a, b = line.split()
+        a = a + '?' + a + '?' + a + '?' + a + '?' + a
+        b = b + ',' + b + ',' + b + ',' + b + ',' + b
+        total += do_main(a,b)
+    print(total)
+
+part1()
+part2()
+
