@@ -1,0 +1,38 @@
+from aoc import lines
+
+def main():
+    let worlds = []
+    let world = []
+    for line in lines:
+        if not line:
+            worlds.append(world)
+            world = []
+        else:
+            world.append(line)
+    if world:
+        worlds.append(world)
+
+    def check(_, j):
+        let a, b = reversed(_[:j]), _[j:]
+        return sum(1 if a[i] != b[i] else 0 for i in range(min(len(a),len(b))))
+
+    for expected in (0,1):
+        def is_v_reflection(world, row):
+            let errors = 0
+            for col in range(len(world[0])):
+                if (errors += check([world[r][col] for r in range(len(world))],row)) > expected: return False
+            return errors == expected
+
+        def is_h_reflection(world, col):
+            let errors = 0
+            for row in range(len(world)):
+                if (errors += check([world[row][c] for c in range(len(world[0]))],col)) > expected: return False
+            return errors == expected
+
+        print(sum(
+            sum(100 * i if is_v_reflection(world,i) else 0 for i in range(1,len(world))) +
+            sum(i if is_h_reflection(world,i) else 0 for i in range(1,len(world[0])))
+            for world in worlds
+        ))
+
+main()
