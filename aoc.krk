@@ -35,3 +35,16 @@ def reduce(func,seq):
 def memoize(func):
     let memo = {}
     return lambda a: memo[a] if a in memo else (memo[a] = func(a))
+
+def line_groups():
+    let out = []
+    let this = []
+    for line in lines:
+        if not line:
+            out.append(this)
+            this = []
+        else:
+            this.append(line)
+    if this:
+        out.append(this)
+    return out

@@ -1,16 +1,7 @@
-from aoc import lines
+from aoc import line_groups
 
 def main():
-    let worlds = []
-    let world = []
-    for line in lines:
-        if not line:
-            worlds.append(world)
-            world = []
-        else:
-            world.append(line)
-    if world:
-        worlds.append(world)
+    let worlds = line_groups() # split on empty line into list[list[str]]
 
     def check(_, j):
         let a, b = reversed(_[:j]), _[j:]
