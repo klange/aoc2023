@@ -1,0 +1,121 @@
+from aoc import lines
+
+def main():
+
+    let world = [[c for c in line] for line in lines]
+
+    def tilt_east(world):
+        for line in world:
+            let m = len(line)
+            let f = 0
+            let n = 0
+            for c = 0; c <= m; c++:
+                if c == m or line[m-c-1] == '#':
+                    let j = c - f - n
+                    while j < c - n:
+                        line[m-j-1] = 'O'
+                        j++
+                    while j < c:
+                        line[m-j-1] = '.'
+                        j++
+                    f = 0
+                    n = 0
+                else if line[m-c-1] == 'O':
+                    f += 1
+                else if line[m-c-1] == '.':
+                    n += 1
+
+    def tilt_west(world):
+        for line in world:
+            let m = len(line)
+            let f = 0
+            let n = 0
+            for c = 0; c <= m; c++:
+                if c == m or line[c] == '#':
+                    let j = c - f - n
+                    while j < c - n:
+                        line[j] = 'O'
+                        j++
+                    while j < c:
+                        line[j] = '.'
+                        j++
+                    f = 0
+                    n = 0
+                else if line[c] == 'O':
+                    f += 1
+                else if line[c] == '.':
+                    n += 1
+
+    def tilt_north(world):
+        for c in range(len(world)):
+            let m = len(world[0])
+            let f = 0
+            let n = 0
+            for r = 0; r <= m; r++:
+                if r == m or world[r][c] == '#':
+                    let j = r - f - n
+                    while j < r - n:
+                        world[j][c] = 'O'
+                        j++
+                    while j < r:
+                        world[j][c] = '.'
+                        j++
+                    f = 0
+                    n = 0
+                else if world[r][c] == 'O':
+                    f += 1
+                else if world[r][c] == '.':
+                    n += 1
+
+    def tilt_south(world):
+        for c in range(len(world)):
+            let m = len(world[0])
+            let f = 0
+            let n = 0
+            for r = 0; r <= m; r++:
+                if r == m or world[m-r-1][c] == '#':
+                    let j = r - f - n
+                    while j < r - n:
+                        world[m-j-1][c] = 'O'
+                        j++
+                    while j < r:
+                        world[m-j-1][c] = '.'
+                        j++
+                    f = 0
+                    n = 0
+                else if world[m-r-1][c] == 'O':
+                    f += 1
+                else if world[m-r-1][c] == '.':
+                    n += 1
+
+    let seen = {}
+    let i = 0
+    while i < 1000000000:
+        let t = tuple(tuple(c for c in line) for line in world)
+        if t in seen:
+            world = [[c for c in line] for line in seen[t][0]]
+            print(i,(i-3)%7+3,seen[t][1])
+
+            if (i-3)%7+3 == (1000000000-4)%7+3:
+                break
+            i += 1
+            continue
+        tilt_north(world)
+        tilt_west(world)
+        tilt_south(world)
+        tilt_east(world)
+        seen[t] = tuple(tuple(c for c in line) for line in world), i
+        i += 1
+
+    for line in world:
+        print(''.join(line))
+
+    let load = 0
+    for c in range(len(world[0])):
+        for r in range(len(world)):
+            if world[r][c] == 'O':
+                load += len(world)-r
+    print(load)
+
+
+main()
