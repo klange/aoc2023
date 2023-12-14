@@ -2,26 +2,30 @@ from aoc import lines
 
 def main(part):
 
-    let world = [[c for c in line] for line in lines]
+    let world = [bytearray(line.encode()) for line in lines]
     let M = len(world)
+
+    let c_h = ord('#')
+    let c_O = ord('O')
+    let c_p = ord('.')
 
     def tilt(world, row, col):
         for a in range(M):
             let f, n, b = 0, 0, 0
             while b <= M:
-                if b == M or world[row(a,b,M)][col(a,b,M)] == '#':
+                if b == M or world[row(a,b,M)][col(a,b,M)] == c_h:
                     let j = b - f - n
                     while j < b - n:
-                        world[row(a,j,M)][col(a,j,M)] = 'O'
+                        world[row(a,j,M)][col(a,j,M)] = c_O
                         j++
                     while j < b:
-                        world[row(a,j,M)][col(a,j,M)] = '.'
+                        world[row(a,j,M)][col(a,j,M)] = c_p
                         j++
                     f = 0
                     n = 0
-                else if world[row(a,b,M)][col(a,b,M)] == 'O':
+                else if world[row(a,b,M)][col(a,b,M)] == c_O:
                     f++
-                else if world[row(a,b,M)][col(a,b,M)] == '.':
+                else if world[row(a,b,M)][col(a,b,M)] == c_p:
                     n++
                 b++
 
@@ -48,9 +52,9 @@ def main(part):
         let C
         let i = 0
         while i < 1000000000:
-            let t = tuple(tuple(c for c in line) for line in world)
+            let t = tuple(line.decode() for line in world)
             if t in seen:
-                world = [[c for c in line] for line in seen[t][0]]
+                world = [bytearray(line.encode()) for line in seen[t][0]]
                 if C is None:
                     C = i - seen[t][1]
                     i = i + ((1000000000 - i) // C) * C
@@ -59,12 +63,12 @@ def main(part):
                 tilt_west(world)
                 tilt_south(world)
                 tilt_east(world)
-                seen[t] = tuple(tuple(c for c in line) for line in world), i
+                seen[t] = tuple(line.decode() for line in world), i
             i += 1
     let load = 0
     for c in range(len(world[0])):
         for r in range(len(world)):
-            if world[r][c] == 'O':
+            if world[r][c] == c_O:
                 load += len(world)-r
     print(load)
 
