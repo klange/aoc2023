@@ -1,0 +1,42 @@
+from aoc import lines
+
+def main():
+    def hash(thing):
+        let v = 0
+        for c in thing:
+            v = ((v + ord(c)) * 17) % 256
+        return v
+    let steps = lines[0].split(',')
+
+    let p1 = 0
+    let boxes = [[] for i in range(256)]
+    let dboxs = [{} for i in range(256)]
+    for step in steps:
+        p1 += hash(step)
+        let op = '=' in step
+        let lb = step.split('=')[0] if op else step[:-1]
+        let ar = step.split('=')[1] if op else None
+        let h = hash(lb)
+        if not op:
+            if lb in dboxs[h]:
+                let a = dboxs[h][lb]
+                boxes[h].remove(a)
+                del dboxs[h][lb]
+        else:
+            if lb in dboxs[h]:
+                dboxs[h][lb][1] = ar
+            else:
+                let a = [lb,ar]
+                dboxs[h][lb] = a
+                boxes[h].append(a)
+
+    let t = 0
+    for box in range(len(boxes)):
+        for slot in range(len(boxes[box])):
+            let power = (box + 1) * (slot + 1) * (int(boxes[box][slot][1]))
+            t += power
+
+    print(p1)
+    print(t)
+
+main()
