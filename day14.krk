@@ -1,49 +1,38 @@
 from aoc import lines
+import dis
 
 def main(part):
-
     let world = [bytearray(line.encode()) for line in lines]
-    let M = len(world)
-
-    let c_h = ord('#')
-    let c_O = ord('O')
-    let c_p = ord('.')
-
-    def tilt(world, row, col):
-        for a in range(M):
+    def make_it(M,R,C,R_J,C_J):
+        let code = f'''
+if True:
+    def tilt(world):
+        for a in range({M}):
             let f, n, b = 0, 0, 0
-            while b <= M:
-                if b == M or world[row(a,b,M)][col(a,b,M)] == c_h:
+            while b <= {M}:
+                if b == {M} or world[{R}][{C}] == 35:
                     let j = b - f - n
                     while j < b - n:
-                        world[row(a,j,M)][col(a,j,M)] = c_O
+                        world[{R_J}][{C_J}] = 79
                         j++
                     while j < b:
-                        world[row(a,j,M)][col(a,j,M)] = c_p
+                        world[{R_J}][{C_J}] = 46
                         j++
                     f = 0
                     n = 0
-                else if world[row(a,b,M)][col(a,b,M)] == c_O:
+                else if world[{R}][{C}] == 79:
                     f++
-                else if world[row(a,b,M)][col(a,b,M)] == c_p:
+                else if world[{R}][{C}] == 46:
                     n++
                 b++
+'''
+        return function(dis.build(code).__constants__[0],(),{})
 
-    let tilt_east = lambda world: tilt(world,
-        (lambda a, b, M: a),
-        (lambda a, b, M: M - b - 1))
-
-    let tilt_west = lambda world: tilt(world,
-        (lambda a, b, M: a),
-        (lambda a, b, M: b))
-
-    let tilt_north = lambda world: tilt(world,
-        (lambda a, b, M: b),
-        (lambda a, b, M: a))
-
-    let tilt_south = lambda world: tilt(world,
-        (lambda a, b, M: M - b - 1),
-        (lambda a, b, M: a))
+    let M = len(world)
+    let tilt_east  = make_it(M, 'a',f'{M} - b - 1','a',f'{M} - j - 1')
+    let tilt_west  = make_it(M, 'a','b','a','j')
+    let tilt_north = make_it(M, 'b','a','j','a')
+    let tilt_south = make_it(M, f'{M} - b - 1','a',f'{M} - j - 1','a')
 
     if part == 1:
         tilt_north(world)
@@ -68,7 +57,7 @@ def main(part):
     let load = 0
     for c in range(len(world[0])):
         for r in range(len(world)):
-            if world[r][c] == c_O:
+            if world[r][c] == ord('O'):
                 load += len(world)-r
     print(load)
 
