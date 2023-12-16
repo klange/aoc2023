@@ -1,0 +1,50 @@
+def main():
+    from aoc import lines
+    let ly = len(lines)
+    let lx = len(lines[0])
+
+    def do_it(y,x,d_y,d_x):
+        let energized = set()
+        let seen = set()
+
+        def shootBeam(y,x,d_y,d_x):
+            while True:
+                if (y,x,d_y,d_x) in seen: break
+                energized.add((y,x))
+                seen.add((y,x,d_y,d_x))
+
+                y, x = y + d_y, x + d_x
+                if y < 0 or x < 0 or y >= ly or x >= lx: break
+
+                let c = lines[y][x]
+                if c == '/':
+                    d_y, d_x = -d_x, -d_y
+                else if c == '\\':
+                    d_y, d_x = d_x, d_y
+                else if c == '|' and d_x:
+                    shootBeam(y,x,-1,0)
+                    d_y, d_x = 1, 0
+                else if c == '-' and d_y:
+                    shootBeam(y,x,0,-1)
+                    d_y, d_x = 0, 1
+
+        shootBeam(y,x,d_y,d_x)
+        return len(energized)-1
+
+    # Part 1
+    print(do_it(0,-1,0,1))
+
+    # Part 2
+    let m = 0
+    for y in range(ly):
+        let a = do_it(y,-1,0,1)
+        let b = do_it(y,lx,0,-1)
+        m = max(m,a,b)
+
+    for x in range(lx):
+        let a = do_it(-1,x,1,0)
+        let b = do_it(ly,x,-1,0)
+        m = max(m,a,b)
+    print(m)
+
+main()
