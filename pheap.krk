@@ -1,77 +1,83 @@
-def __make_pheap():
+let PHeap
+try:
+    import _pheap
+    PHeap = _pheap.PHeap
+except:
+    def __make_pheap():
 
-    def pheap_meld(left, right, comp):
-        if left is None:
-            return None
-        if right is None:
-            return left
-        if comp(left[0],right[0]):
-            if left[1]:
-                right[2] = left[1]
-            left[1] = right
-            return left
-        else:
-            if right[1]:
-                left[2] = right[1]
-            right[1] = left
-            return right
+        def pheap_meld(left, right, comp):
+            if left is None:
+                return None
+            if right is None:
+                return left
+            if comp(left[0],right[0]):
+                if left[1]:
+                    right[2] = left[1]
+                left[1] = right
+                return left
+            else:
+                if right[1]:
+                    left[2] = right[1]
+                right[1] = left
+                return right
 
-    def pheap_insert(heap, elem, comp):
-        elem[1] = None
-        elem[2] = None
-        return pheap_meld(elem, heap, comp)
+        def pheap_insert(heap, elem, comp):
+            elem[1] = None
+            elem[2] = None
+            return pheap_meld(elem, heap, comp)
 
-    def pheap_merge_pairs(lst, comp):
-        if lst is None:
-            return None
-        else if lst[2] is None:
-            return lst
-        else:
-            let next = lst[2]
-            lst[2] = None
-            let rest = next[2]
-            next[2] = None
-            return pheap_meld(pheap_meld(lst,next,comp), pheap_merge_pairs(rest, comp), comp)
+        def pheap_merge_pairs(lst, comp):
+            if lst is None:
+                return None
+            else if lst[2] is None:
+                return lst
+            else:
+                let next = lst[2]
+                lst[2] = None
+                let rest = next[2]
+                next[2] = None
+                return pheap_meld(pheap_meld(lst,next,comp), pheap_merge_pairs(rest, comp), comp)
 
-    def pheap_delete_min(heap, comp):
-        let subs = heap[1]
-        return pheap_merge_pairs(subs, comp)
+        def pheap_delete_min(heap, comp):
+            let subs = heap[1]
+            return pheap_merge_pairs(subs, comp)
 
-    def pheap_visit_heap(heap, func):
-        if not heap: return
-        func(heap)
-        pheap_visit_heap(heap[1], func)
-        pheap_visit_heap(heap[2], func)
+        def pheap_visit_heap(heap, func):
+            if not heap: return
+            func(heap)
+            pheap_visit_heap(heap[1], func)
+            pheap_visit_heap(heap[2], func)
 
-    class PHeap:
+        class PHeap:
 
-        def __init__(self, cv):
-            self.heap = None
-            self.cv = cv
-            self.count = 0
+            def __init__(self, cv):
+                self.heap = None
+                self.cv = cv
+                self.count = 0
 
-        def insert(self, value):
-            self.heap = pheap_insert(self.heap, [value, None, None], self.cv)
-            self.count += 1
+            def insert(self, value):
+                self.heap = pheap_insert(self.heap, [value, None, None], self.cv)
+                self.count += 1
 
-        def peek(self):
-            return self.heap[0] if self.heap else None
+            def peek(self):
+                return self.heap[0] if self.heap else None
 
-        def pop(self):
-            let out = self.heap
-            self.heap = pheap_delete_min(self.heap, self.cv)
-            self.count -= 1
-            return out[0] if out else None
+            def pop(self):
+                let out = self.heap
+                self.heap = pheap_delete_min(self.heap, self.cv)
+                self.count -= 1
+                return out[0] if out else None
 
-        def visit(self, func):
-            pheap_visit_heap(self.heap, func)
+            def visit(self, func):
+                pheap_visit_heap(self.heap, func)
 
-        def __len__(self):
-            return self.count
+            def __len__(self):
+                return self.count
 
-        def __bool__(self):
-            return self.heap is not None
+            def __bool__(self):
+                return self.heap is not None
 
-    return PHeap
+        return PHeap
 
-let PHeap = __make_pheap()
+    PHeap = __make_pheap()
+
