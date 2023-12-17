@@ -1,59 +1,41 @@
+from aoc import lines
 from time import time
 from pheap import PHeap
 
 def main(max_straight,min_turn):
-    from aoc import lines
     from math import inf
-
-    let ly = len(lines)
-    let lx = len(lines[0])
-
-    let cv = lambda a,b: (a[5] + lx - a[3] + ly - a[2] + 2) < (b[5] + lx - b[3] + ly - b[2] + 2)
-
-    let s = inf
-    let visited = {}
-    let next = PHeap(cv)
-    next.insert((0,0,0,1,1,int(lines[0][1])))
-    next.insert((0,0,1,0,1,int(lines[1][0])))
-
-    let m = s
-    let t_c = int(lines[ly-1][lx-1])
-    let best = ()
+    let world = [[int(c) for c in line] for line in lines]
+    let ly = len(world) # Make bounds checks faster
+    let lx = len(world[0])
+    let cv = lambda a,b: (a[5] - a[3] - a[2]) < (b[5] - b[3] - b[2])
+    let visited = {} # Current cheapest cost to reach this state
+    let next = PHeap(cv) # States to try next; best guess first.
+    next.insert((0,0,0,1,1,world[0][1])) # Go right from the start.
+    next.insert((0,0,1,0,1,world[1][0])) # Go down from the start.
     def maybe(py,px,y,x,d,ny,nx,c):
-        if c >= m or nx < 0 or ny < 0 or nx >= lx or ny >= ly:
-            return
-        if (py == ny and px == nx):
-            return
-
-        if (y - py) == (ny - y) and (x - px) == (nx - x):
-            if d >= max_straight: return
-            next.insert((y,x,ny,nx,d+1,c+int(lines[ny][nx])))
-        else if d >= min_turn:
-            next.insert((y,x,ny,nx,1,c+int(lines[ny][nx])))
-
+        if nx < 0 or ny < 0 or nx >= lx or ny >= ly: return # Out of bounds.
+        if (py == ny and px == nx): return # Can't go backwards.
+        if (y - py) == (ny - y) and (x - px) == (nx - x): # Same direction
+            if d >= max_straight: return # Can't go straight for too long.
+            next.insert((y,x,ny,nx,d+1,c+world[ny][nx]))
+        else if d >= min_turn: # Turning left or right
+            next.insert((y,x,ny,nx,1,c+world[ny][nx]))
     while next:
         let py,px,y,x,d,c = next.pop()
-
-        if c + (lx - x + 1) + (ly - y + 1) >= m or visited.get((py,px,y,x,d),inf) <= c:
-            continue
-
+        if visited.get((py,px,y,x,d),inf) <= c: continue
+        # Have we reached the end?
         if y == ly - 1 and x == lx - 1:
-            if d < min_turn:
-                continue
-            if c < m:
-                m = c
-            continue
-
+            if d < min_turn: continue # Can't stop here, invalid.
+            return c
         visited[py,px,y,x,d] = c
-        maybe(py,px,y,x,d,y+1,x,c)
-        maybe(py,px,y,x,d,y,x+1,c)
-        maybe(py,px,y,x,d,y-1,x,c)
-        maybe(py,px,y,x,d,y,x-1,c)
-
-    print(m)
+        maybe(py,px,y,x,d,y+1,x,c) # Down
+        maybe(py,px,y,x,d,y,x+1,c) # Right
+        maybe(py,px,y,x,d,y-1,x,c) # Up
+        maybe(py,px,y,x,d,y,x-1,c) # Left
+    return None
 
 let start = time()
-main(3,0)
+print(main(3,0))
 print(time()-start)
-main(10,4)
+print(main(10,4))
 print(time()-start)
