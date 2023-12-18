@@ -1,0 +1,23 @@
+def main(part2=False):
+    from aoc import lines
+    let y, x = 0, 0
+    let s = 0
+    for line in lines:
+        let d, c, color = line.split()
+        if part2:
+            color = color[2:-1]
+            d = 'RDLU'[int(color[-1])]
+            c = int(color[:-1],16)
+        else:
+            c = int(c)
+        let _y, _x = y, x
+        if d == 'U': y -= c
+        else if d == 'D': y += c
+        else if d == 'R': x += c
+        else if d == 'L': x -= c
+        s += (_y + y) * (_x - x) + c
+    s += y * x
+    return s // 2 + 1
+
+print(main())
+print(main(True))
