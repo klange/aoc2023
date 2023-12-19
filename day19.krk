@@ -1,32 +1,14 @@
 def main():
-    from aoc import lines
+    from aoc import line_groups, reduce
+    from collections import deque
 
-    let instructions = []
-    let parts = []
-
-    let mode = 0
-    for line in lines:
-        if not line:
-            mode++
-            continue
-        if mode == 0:
-            instructions.append(line)
-        else if mode == 1:
-            let part = {}
-            let p = line.replace('{','').replace('}','').split(',')
-            for _ in p:
-                let a, b = _.split('=')
-                part[a] = int(b)
-            parts.append(part)
-
-    let wf = {}
-    for w in instructions:
-        let label, rest = w.replace('}','').split('{')
-        let rules = rest.split(',')
-        wf[label] = rules
-
-    wf['R'] = None
-    wf['A'] = 'A'
+    let instructions, baseparts = line_groups()
+    let wf, parts = {'R': None, 'A': 'A'}, []
+    for inst in instructions:
+        let label, rest = inst.strip('}').split('{')
+        wf[label] = {x if ':' not in x else (lambda _: (_[0][0], _[0][1], int(_[0][2:]), _[1]))(x.split(':')) for x in rest.split(',')}
+    for part in baseparts:
+        parts.append({a[0]: int(a[1]) for a in (x.split('=') for x in part.strip('{}').split(','))})
 
     def _part1():
         let accepted = []
@@ -34,55 +16,36 @@ def main():
             let current = wf['in']
             while current:
                 for rule in current:
-                    if ':' in rule:
-                        let f, d = rule.split(':')
-                        let b = int(f[2:])
-                        if f[1] == '>':
-                            if part[f[0]] > b:
-                                current = wf[d]
-                                break
-                        else if f[1] == '<':
-                            if part[f[0]] < b:
-                                current = wf[d]
-                                break
+                    if isinstance(rule,tuple):
+                        let a, o, b, d = rule
+                        if o == '>' and part[a] > b:
+                            current = wf[d]
+                            break
+                        else if o == '<' and part[a] < b:
+                            current = wf[d]
+                            break
                     else:
                         current = wf[rule]
                         break
                 if current == 'A':
                     accepted.append(part)
                     current = None
-
-        let t = 0
-        for p in accepted:
-            t += sum(p.values())
-
-        return t
+        return sum(sum(p.values()) for p in accepted)
 
     def _part2():
         let current = wf['in']
-
         let mp = {'x': 0, 'm': 1, 'a': 2, 's': 3}
-
-        from collections import deque
         let next = deque()
-
         next.append(('in',[[1,4000],[1,4000],[1,4000],[1,4000]]))
-
         let accept = []
-
         while next:
             let current, states = next.popleft()
-
             if current == 'R':
                 continue
-
             for rule in wf[current]:
                 let nstate = [[x for x in s] for s in states]
-                if ':' in rule:
-                    let f, d = rule.split(':')
-                    let a = f[0]
-                    let o = f[1]
-                    let b = int(f[2:])
+                if isinstance(rule,tuple):
+                    let a, o, b, d = rule
                     if o == '>':
                         nstate[mp[a]][0] = max(b+1,nstate[mp[a]][0])
                         states[mp[a]][1] = min(b,states[mp[a]][1])
@@ -98,14 +61,7 @@ def main():
                         accept.append(states)
                     else:
                         next.append((rule,states))
-
-        let t = 0
-        for state in accept:
-            let s = 1
-            for a in state:
-                s *= (a[1] - a[0] + 1)
-            t += s
-        return t
+        return sum(reduce((lambda a,b: a * (b[1] - b[0] + 1)), [1, *state]) for state in accept)
 
     print(_part1())
     print(_part2())
