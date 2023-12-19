@@ -1,7 +1,7 @@
 def main(part2=False):
     from aoc import lines
     let y, x = 0, 0
-    let s = 0
+    let s, t = 0, 0
     for line in lines:
         let d, c, color = line.split()
         if part2:
@@ -15,9 +15,9 @@ def main(part2=False):
         else if d == 'D': y += c
         else if d == 'R': x += c
         else if d == 'L': x -= c
-        s += (_y + y) * (_x - x) + c
-    s += y * x
-    return s // 2 + 1
+        s += (_y + y) * (_x - x)
+        t += c
+    return (abs(s) + t) // 2 + 1
 
 print(main())
 print(main(True))
