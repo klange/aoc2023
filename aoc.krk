@@ -12,11 +12,8 @@ let lines = [line.strip() for line in data_stripped.split('\n')]
 let lines_raw = data.split('\n')
 
 def gcd(a,b):
-    while a != b:
-        if a > b:
-            a = a - b
-        else if b > a:
-            b = b - a
+    while b:
+        b, a = a % b, b
     return a
 
 def lcm(a,b):
