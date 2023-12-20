@@ -1,0 +1,70 @@
+def main():
+    from aoc import lines, lcm
+    from collections import deque
+
+    let labels = {}
+    for line in lines:
+        let a, b = line.split(' -> ')
+        let state = False
+        let typ = 0
+        if a.startswith('%'):
+            a = a[1:]
+            typ = 2
+        else if a.startswith('&'):
+            a = a[1:]
+            typ = 1
+            state = {}
+        labels[a] = [b.split(', '), state, typ]
+
+    # Set initial states for conjunction inputs to False.
+    for label, value in labels.items():
+        for dest in value[0]:
+            if dest not in labels:
+                continue
+            if labels[dest][2] == 1:
+                labels[dest][1][label] = False
+
+    let next = deque()
+    let counts = [0,0]
+    let finished = {}
+
+    for i in range(1,2049):
+        next.append(('broadcaster',0,'button'))
+        while next:
+            let node, high, frm = next.popleft()
+            counts[high] += 1
+            if node not in labels: continue
+            let dests, state, t = labels[node]
+            if high and t == 2:
+                # High pulse to flip-flop, does not emit pulse.
+                continue
+            else if t == 2:
+                # Low pulse to flip-flip, flips state and emits previous.
+                high = labels[node][1] = not labels[node][1]
+            else if t == 1:
+                # Conjunction, remembers states of inputs...
+                labels[node][1][frm] = high
+                high = not all(labels[node][1].values())
+            for dest in dests:
+                next.append((dest, high, node))
+
+        # Part 1: Print high counts * low counts after 1000 presses.
+        if i == 1000:
+            print(counts[0] * counts[1])
+
+        # Part 2: Figure out when the flip-flops cycle.
+        for label, values in labels.items():
+            if label not in finished:
+                if isinstance(values[1],bool) and values[1]:
+                    finished[label] = i
+
+    # Part 2: Find the LCM of the cycle rates of the interesting conjunctions
+    let t = 1
+    for label, value in labels.items():
+        if isinstance(value[1],dict):
+            if any(k not in finished for k in value[1].keys()):
+                continue
+            t = lcm(t, sum(finished[k] for k in value[1].keys()))
+    print(t)
+
+main()
