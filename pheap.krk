@@ -7,7 +7,7 @@ except:
 
         def pheap_meld(left, right, comp):
             if left is None:
-                return None
+                return right
             if right is None:
                 return left
             if comp(left[0],right[0]):
@@ -20,11 +20,6 @@ except:
                     left[2] = right[1]
                 right[1] = left
                 return right
-
-        def pheap_insert(heap, elem, comp):
-            elem[1] = None
-            elem[2] = None
-            return pheap_meld(elem, heap, comp)
 
         def pheap_merge_pairs(lst, comp):
             if lst is None:
@@ -56,7 +51,7 @@ except:
                 self.count = 0
 
             def insert(self, value):
-                self.heap = pheap_insert(self.heap, [value, None, None], self.cv)
+                self.heap = pheap_meld(self.heap, [value, None, None], self.cv)
                 self.count += 1
 
             def peek(self):
