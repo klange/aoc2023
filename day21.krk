@@ -57,6 +57,7 @@ def main2(amount):
     let bs = [None for n in range(lx)]
     let possible = 0
     let nc, dc
+    let cond = amount & 1
 
     if True:
         let next = deque()
@@ -89,8 +90,8 @@ def main2(amount):
 
             if c != last_refresh:
                 last_refresh = c
-                if not c & 1:
-                    if c > lx:
+                if c & 1 != cond:
+                    if c > 100:
                         if last_thing[c%lx] is not None:
                             let x = c // lx
                             let t = (possible-last_count)-last_deriv
@@ -104,12 +105,13 @@ def main2(amount):
                     if all(x is not None for x in bs):
                         nc = c + 2
                         dc = last_deriv
-                        print('patterns established by', nc)
+                        possible = float(possible)
+                        print('patterns established by', nc, possible, dc)
                         break
                 touched_recently = set(touched_recently)
                 collect()
 
-            if c & 1:
+            if c & 1 == cond:
                 possible += 1
             let y, x = p
             tryIt(y-1,x,c+1)
@@ -120,8 +122,12 @@ def main2(amount):
     while nc <= amount + 1:
         possible += (dc += bs[nc%lx] * (nc // lx) + ks[nc%lx])
         nc += 2
-    return possible
+
+    for i in range(lx):
+        print(f'f[{i}](x) = {bs[i]}x + {ks[i]}')
+    return int(possible)
 
 
 #print(main())
 print(main2(26501365))
+#print(main2(5000))
