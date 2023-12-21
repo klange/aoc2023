@@ -1,48 +1,6 @@
-def main():
+def main(amount):
     from aoc import lines
     from collections import deque
-
-    let start
-    for y in range(len(lines)):
-        for x in range(len(lines[0])):
-            if lines[y][x] == 'S':
-                start = y,x
-                break
-
-    let my = len(lines) - 1
-    let mx = len(lines[0]) - 1
-
-    let next = deque()
-
-    next.append((start, 0))
-
-    let can_reach = set()
-    let visited = set()
-
-    while next:
-        let p, c = next.popleft()
-        let y, x = p
-
-        if c == 64:
-            can_reach.add(p)
-            continue
-
-        if (p,c) in visited:
-            continue
-
-        visited.add((p,c))
-
-        if y > 0 and lines[y-1][x] != '#':  next.append(((y-1,x),c+1))
-        if x > 0 and lines[y][x-1] != '#':  next.append(((y,x-1),c+1))
-        if y < my and lines[y+1][x] != '#': next.append(((y+1,x),c+1))
-        if x < mx and lines[y][x+1] != '#': next.append(((y,x+1),c+1))
-
-    return len(can_reach)
-
-def main2(amount):
-    from aoc import lines
-    from collections import deque
-    from gc import collect
 
     let start
     for y in range(len(lines)):
@@ -61,8 +19,7 @@ def main2(amount):
 
     if True:
         let next = deque()
-        let touched_recently = {start}
-        let to_remove = deque()
+        let touched = {start}
         let last_refresh = 1
         let last_count = 0
         let last_deriv = 0
@@ -74,19 +31,14 @@ def main2(amount):
             let my, mx = y % ly, x % lx
             if lines[my][mx] == '#': return
             let f = (y,x)
-            if f in touched_recently: return
+            if f in touched: return
             let n = f, c
-            touched_recently.add(f)
+            touched.add(f)
             next.append(n)
 
         while next:
             let f = next.popleft()
             let p, c = f
-
-            to_remove.append(f)
-            while to_remove and to_remove[0][1] < c - 1:
-                let t = to_remove.popleft()
-                touched_recently.remove(t[0])
 
             if c != last_refresh:
                 last_refresh = c
@@ -108,8 +60,8 @@ def main2(amount):
                         possible = float(possible)
                         print('patterns established by', nc, possible, dc)
                         break
-                touched_recently = set(touched_recently)
-                collect()
+                    if c > amount:
+                        return possible
 
             if c & 1 == cond:
                 possible += 1
@@ -127,7 +79,5 @@ def main2(amount):
         print(f'f[{i}](x) = {bs[i]}x + {ks[i]}')
     return int(possible)
 
-
-#print(main())
-print(main2(26501365))
-#print(main2(5000))
+print(main(64))
+print(main(26501365))
