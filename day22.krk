@@ -1,118 +1,109 @@
 def main():
     from aoc import lines
-    from collections import deque
     from pheap import PHeap
+    from collections import deque
+
+    class Brick:
+        def __init__(self, line):
+            let left, right = line.split('~')
+            self.coords = [[int(x) for x in left.split(',')],[int(x) for x in right.split(',')]]
+            self.frozen = False
+            self.degenerate = all(self.coords[0][a] == self.coords[1][a] for a in range(3))
+            self.below = set()
+            self.above = set()
+
+        def freeze(self, world):
+            self.frozen = True
+            for tile in self.tiles():
+                world[tile] = self
+
+        def tiles(self):
+            if self.degenerate:
+                yield (self.coords[0][0], self.coords[0][1], self.coords[0][2])
+                return
+            for c in range(3):
+                if self.coords[0][c] != self.coords[1][c]:
+                    for j in range(min(self.coords[0][c],self.coords[1][c]),max(self.coords[0][c],self.coords[1][c])+1):
+                        yield (self.coords[0][0] if c != 0 else j, self.coords[0][1] if c != 1 else j, self.coords[0][2] if c != 2 else j)
+                    return
+            raise ValueError('bad brick?')
+
+        def lower(self):
+            self.coords[0][2] -= 1
+            self.coords[1][2] -= 1
+
+        def __repr__(self):
+            return f'Brick({"~".join(",".join(str(x) for x in c) for c in self.coords)})'
+
+        @staticmethod
+        def lt(a,b):
+            return min(a.coords[0][2],a.coords[1][2]) < min(b.coords[0][2],b.coords[1][2])
+
+        @staticmethod
+        def gt(a,b):
+            return max(a.coords[0][2],a.coords[1][2]) < max(b.coords[0][2],b.coords[1][2])
 
     let bricks = []
-
-    let frozen_spots = {}
-    def tiles(brick):
-        if all(brick[0][a] == brick[1][a] for a in range(3)):
-            yield (brick[0][0],brick[0][1],brick[0][2])
-            return
-        for c in range(3):
-            if brick[0][c] != brick[1][c]:
-                for j in range(min(brick[0][c],brick[1][c]),max(brick[0][c],brick[1][c])+1):
-                    yield (brick[0][0] if c != 0 else j, brick[0][1] if c != 1 else j, brick[0][2] if c != 2 else j)
-                return
-
     for line in lines:
-        let left, right = line.split('~')
-        let brick = [[int(x) for x in left.split(',')],[int(x) for x in right.split(',')]]
-        brick.frozen = False
-        bricks.append(brick)
+        bricks.append(Brick(line))
 
-    def freeze(brick, frozen_spots):
-        brick.frozen = True
-        for tile in tiles(brick):
-            frozen_spots[tile] = brick
+    let frozen = {}
+    def drop(bricks):
+        while not all(brick.frozen for brick in bricks):
+            let p = PHeap(Brick.lt)
+            for brick in bricks:
+                if not brick.frozen:
+                    p.insert(brick)
+            while p:
+                let brick = p.pop()
+                for tile in brick.tiles():
+                    if tile[2] == 0:
+                        brick.freeze(frozen)
+                        break
+                    else if (tile[0],tile[1],tile[2]-1) in frozen:
+                        brick.freeze(frozen)
+                        break
+            for brick in bricks:
+                if not brick.frozen:
+                    brick.lower()
+
+    drop(bricks)
 
     for brick in bricks:
-        if brick[0][2] == 0 or brick[1][2] == 0:
-            freeze(brick, frozen_spots)
+        for tile in brick.tiles():
+            let below = (tile[0],tile[1],tile[2]-1)
+            let above = (tile[0],tile[1],tile[2]+1)
+            if below in frozen and frozen[below] is not brick:
+                brick.below.add(frozen[below])
+            if above in frozen and frozen[above] is not brick:
+                brick.above.add(frozen[above])
 
-    # Fall
-    def drop(bricks, frozen_spots):
-        let i = 0
-        while not all(brick.frozen for brick in bricks):
-            let p = PHeap(lambda a, b: min(a[0][2],a[1][2]) < min(b[0][2],b[1][2]))
-            for brick in bricks:
-                if not brick.frozen:
-                    p.insert(brick)
-            while p:
-                let brick = p.pop()
-                for tile in tiles(brick):
-                    if tile[2] == 0:
-                        freeze(brick,frozen_spots)
-                        break
-                    else if (tile[0],tile[1],tile[2]-1) in frozen_spots:
-                        freeze(brick,frozen_spots)
-                        break
-            for brick in bricks:
-                if not brick.frozen:
-                    brick[0][2] -= 1
-                    brick[1][2] -= 1
+    let c = 0
+    for brick in bricks:
+        let good = 1
+        for n in brick.above:
+            if not any(i is not brick for i in n.below):
+                good = 0
+                break
+        c += good
+    print(c)
 
-    drop(bricks, frozen_spots)
+    let t = 0
+    for brick in bricks:
+        let destroyed = set()
+        let next = deque()
+        next.append(brick)
+        destroyed.add(brick)
+        while next:
+            let b = next.popleft()
+            for n in b.above:
+                if n in destroyed:
+                    continue
+                if all(i in destroyed for i in n.below):
+                    destroyed.add(n)
+                    next.append(n)
+        t += len(destroyed) - 1
 
-    # Part 1
-    def part1():
-        let c = 0
-        for brick in bricks:
-            let good = True
-            for tile in tiles(brick):
-                let above = (tile[0],tile[1],tile[2]+1)
-                if above in frozen_spots:
-                    let other = frozen_spots[above]
-                    if other is brick:
-                        continue
-                    let would_move = True
-                    for tile in tiles(other):
-                        let under = (tile[0],tile[1],tile[2]-1)
-                        if under in frozen_spots and frozen_spots[under] is not brick and frozen_spots[under] is not other:
-                            would_move = False
-                            break
-                    if would_move:
-                        good = False
-                        break
-            if good:
-                c += 1
-        print(c)
-
-    def clone_brick(b):
-        let nb = [[i for i in j] for j in b]
-        nb.frozen = False
-        return nb
-
-    def part2():
-        let total = 0
-        for brick in bricks:
-            let nbricks = [clone_brick(b) for b in bricks if b is not brick]
-            let nfrozen = {}
-            for n in nbricks:
-                if n[0][2] == 0 or n[1][2] == 0:
-                    freeze(n,nfrozen)
-            let p = PHeap(lambda a, b: min(a[0][2],a[1][2]) < min(b[0][2],b[1][2]))
-            for brick in nbricks:
-                if not brick.frozen:
-                    p.insert(brick)
-            let moved = 0
-            while p:
-                let brick = p.pop()
-                moved += 1
-                for tile in tiles(brick):
-                    if tile[2] == 0:
-                        freeze(brick,nfrozen)
-                        moved -= 1
-                        break
-                    else if (tile[0],tile[1],tile[2]-1) in nfrozen:
-                        freeze(brick,nfrozen)
-                        moved -= 1
-                        break
-            total += moved
-        print(total)
-
-    part1()
-    part2()
+    print(t)
 
 main()
