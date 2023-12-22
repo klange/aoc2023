@@ -19,11 +19,11 @@ def main(amount):
 
     if True:
         let next = deque()
-        let touched = {start}
-        let last_refresh = 1
+        let seen = {start}
+        let last_cycle = 1
         let last_count = 0
-        let last_deriv = 0
-        let last_thing = [None for n in range(lx)]
+        let last_delta = 0
+        let last_deriv = [None for n in range(lx)]
 
         next.append((start, 0))
 
@@ -31,34 +31,33 @@ def main(amount):
             let my, mx = y % ly, x % lx
             if lines[my][mx] == '#': return
             let f = (y,x)
-            if f in touched: return
+            if f in seen: return
             let n = f, c
-            touched.add(f)
+            seen.add(f)
             next.append(n)
 
         while next:
             let f = next.popleft()
             let p, c = f
 
-            if c != last_refresh:
-                last_refresh = c
+            if c != last_cycle:
+                last_cycle = c
                 if c & 1 != cond:
                     if c > 100:
-                        if last_thing[c%lx] is not None:
+                        if last_deriv[c%lx] is not None:
                             let x = c // lx
-                            let t = (possible-last_count)-last_deriv
-                            let b = (t - last_thing[c%lx]) // 2
+                            let t = (possible-last_count)-last_delta
+                            let b = (t - last_deriv[c%lx]) // 2
                             let k = t - (b * x)
                             bs[c%lx] = b
                             ks[c%lx] = k
-                        last_thing[c%lx] = (possible-last_count)-last_deriv
-                    last_deriv = (possible-last_count)
+                        last_deriv[c%lx] = (possible-last_count)-last_delta
+                    last_delta = (possible-last_count)
                     last_count = possible
                     if all(x is not None for x in bs):
                         nc = c + 2
-                        dc = last_deriv
+                        dc = last_delta
                         possible = float(possible)
-                        print('patterns established by', nc, possible, dc)
                         break
                     if c > amount:
                         return possible
