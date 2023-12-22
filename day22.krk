@@ -48,21 +48,19 @@ def main():
 
     # Drop 'em
     let frozen = {}
-    while not all(brick.frozen for brick in bricks):
-        let p = PHeap(Brick.lt)
-        for brick in bricks:
-            if not brick.frozen:
-                p.insert(brick)
-        while p:
-            let brick = p.pop()
+    let p = PHeap(Brick.lt)
+    for brick in bricks:
+        p.insert(brick)
+    while p:
+        let brick = p.pop()
+        while not brick.frozen:
+            if brick.minz == 0:
+                brick.freeze(frozen)
+                break
             for tile in brick.tiles():
-                if tile[2] == 0:
+                if (tile[0],tile[1],tile[2]-1) in frozen:
                     brick.freeze(frozen)
                     break
-                else if (tile[0],tile[1],tile[2]-1) in frozen:
-                    brick.freeze(frozen)
-                    break
-        for brick in bricks:
             if not brick.frozen:
                 brick.lower()
 
