@@ -11,6 +11,7 @@ def main():
             self.degenerate = all(self.coords[0][a] == self.coords[1][a] for a in range(3))
             self.below = set()
             self.above = set()
+            self.minz = min(self.coords[0][2],self.coords[1][2])
 
         def freeze(self, world):
             self.frozen = True
@@ -31,44 +32,41 @@ def main():
         def lower(self):
             self.coords[0][2] -= 1
             self.coords[1][2] -= 1
+            self.minz = min(self.coords[0][2],self.coords[1][2])
 
         def __repr__(self):
             return f'Brick({"~".join(",".join(str(x) for x in c) for c in self.coords)})'
 
         @staticmethod
         def lt(a,b):
-            return min(a.coords[0][2],a.coords[1][2]) < min(b.coords[0][2],b.coords[1][2])
+            return a.minz < b.minz
 
-        @staticmethod
-        def gt(a,b):
-            return max(a.coords[0][2],a.coords[1][2]) < max(b.coords[0][2],b.coords[1][2])
-
+    # Build 'em
     let bricks = []
     for line in lines:
         bricks.append(Brick(line))
 
+    # Drop 'em
     let frozen = {}
-    def drop(bricks):
-        while not all(brick.frozen for brick in bricks):
-            let p = PHeap(Brick.lt)
-            for brick in bricks:
-                if not brick.frozen:
-                    p.insert(brick)
-            while p:
-                let brick = p.pop()
-                for tile in brick.tiles():
-                    if tile[2] == 0:
-                        brick.freeze(frozen)
-                        break
-                    else if (tile[0],tile[1],tile[2]-1) in frozen:
-                        brick.freeze(frozen)
-                        break
-            for brick in bricks:
-                if not brick.frozen:
-                    brick.lower()
+    while not all(brick.frozen for brick in bricks):
+        let p = PHeap(Brick.lt)
+        for brick in bricks:
+            if not brick.frozen:
+                p.insert(brick)
+        while p:
+            let brick = p.pop()
+            for tile in brick.tiles():
+                if tile[2] == 0:
+                    brick.freeze(frozen)
+                    break
+                else if (tile[0],tile[1],tile[2]-1) in frozen:
+                    brick.freeze(frozen)
+                    break
+        for brick in bricks:
+            if not brick.frozen:
+                brick.lower()
 
-    drop(bricks)
-
+    # Stack 'em
     for brick in bricks:
         for tile in brick.tiles():
             let below = (tile[0],tile[1],tile[2]-1)
@@ -78,16 +76,8 @@ def main():
             if above in frozen and frozen[above] is not brick:
                 brick.above.add(frozen[above])
 
+    # Bust 'em
     let c = 0
-    for brick in bricks:
-        let good = 1
-        for n in brick.above:
-            if not any(i is not brick for i in n.below):
-                good = 0
-                break
-        c += good
-    print(c)
-
     let t = 0
     for brick in bricks:
         let destroyed = set()
@@ -102,8 +92,10 @@ def main():
                 if all(i in destroyed for i in n.below):
                     destroyed.add(n)
                     next.append(n)
+        c += len(destroyed) == 1
         t += len(destroyed) - 1
 
-    print(t)
+    print(c) # Would not move anything
+    print(t) # Total other bricks moved
 
 main()
