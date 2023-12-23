@@ -35,20 +35,17 @@ def main1():
 def main2():
     from aoc import lines
     from time import time
+    from collections import defaultdict
 
     let my = len(lines)-1
     let mx = len(lines[0])-1
 
-    let intersections = {}
-    intersections[0,1] = {}
+    let intersections = defaultdict(dict)
 
     let t = time()
     def walk(y,x,visited,came_from,c):
         if y == my and x == mx - 1:
-            if (y,x) not in intersections:
-                intersections[y,x] = {came_from: c}
-            else:
-                intersections[y,x][came_from] = c
+            intersections[y,x][came_from] = c
             intersections[came_from][y,x] = c
             return
 
@@ -59,10 +56,7 @@ def main2():
         if y < my and lines[y+1][x] != '#': p += 1
 
         if p > 2:
-            if (y,x) not in intersections:
-                intersections[y,x] = {came_from: c}
-            else:
-                intersections[y,x][came_from] = c
+            intersections[y,x][came_from] = c
             intersections[came_from][y,x] = c
             came_from = (y,x)
             c = 0
@@ -78,25 +72,24 @@ def main2():
     walk(1,1,{(0,1)},(0,1),1)
     print(time() - t)
 
-    let paths = 0
-    let end = (my, mx - 1)
+    # set membership on tuples sounds kinda slow, we only have ~30-some nodes...
+    let j = 1
+    let bits = {i: (j,j<<=1)[0] for i in intersections}
+    let neighbors = {bits[i]: {bits[j]: k for j, k in ns.items() if j != i} for i, ns in intersections.items()}
+    let end = bits[my,mx-1]
+    let bad = -10000000
+
     def attempt(p,visited):
-        if p == end:
-            paths += 1
-            return 0
-        let i = intersections[p]
-        let a = -10000000
-        visited.add(p)
+        if p is end: return 0
+        let i = neighbors[p]
+        let a = bad
         for n in i:
-            if n in visited: continue
-            let c = attempt(n,visited) + i[n]
-            if c > a:
-                a = c
-        visited.remove(p)
+            if n & visited: continue
+            let c = attempt(n,visited|n) + i[n]
+            if c > a: a = c
         return a
 
-    print(attempt((0,1),{(0,1)}))
-    print(paths,'viable paths')
+    print(attempt(bits[0,1],bits[0,1]))
     print(time()-t)
 
 main1()
