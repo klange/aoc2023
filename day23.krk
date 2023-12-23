@@ -35,7 +35,7 @@ def main1():
 def main2():
     from aoc import lines
     from time import time
-    from collections import defaultdict
+    from collections import defaultdict, deque
 
     let my = len(lines)-1
     let mx = len(lines[0])-1
@@ -70,7 +70,6 @@ def main2():
         if y < my and lines[y+1][x] != '#': walk(y+1,x,visited,came_from,c+1)
 
     walk(1,1,{(0,1)},(0,1),1)
-    print(time() - t)
 
     # set membership on tuples sounds kinda slow, we only have ~30-some nodes...
     let j = 1
@@ -79,8 +78,15 @@ def main2():
     let end = bits[my,mx-1]
     let bad = -10000000
 
+    # Further, the end node is only connected to one other node;
+    # if we reach that second-to-last node, we can only go to the end.
+    assert len(neighbors[end]) == 1
+    let true_end = neighbors[end].keys().__iter__()()
+    let true_end_val = neighbors[end][true_end]
+
+    print(time() - t)
     def attempt(p,visited):
-        if p is end: return 0
+        if p is true_end: return true_end_val
         let i = neighbors[p]
         let a = bad
         for n in i:
