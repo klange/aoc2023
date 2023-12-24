@@ -90,10 +90,11 @@ s.add(x + y + z == result)''',file=sat)
         if j == 3:
             break
 
-    print('print(s.check())',file=sat)
+    print('s.check()',file=sat)
     print('m = s.model()',file=sat)
     print('print(m[result])',file=sat)
-    print('print(m[x],m[y],m[z],m[dx],m[dy],m[dz])',file=sat)
+    #print('print(m[x],m[y],m[z],m[dx],m[dy],m[dz])',file=sat)
+    sat.close()
     import os
     os.system("python3 test.py")
 
