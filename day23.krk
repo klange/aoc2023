@@ -1,3 +1,7 @@
+import kuroko
+if kuroko.get_recursion_depth() < 12000:
+    kuroko.set_recursion_depth(12000)
+
 def main1():
     from aoc import lines
 
