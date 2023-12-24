@@ -1,0 +1,101 @@
+def main():
+    from aoc import lines
+
+    def intersection(a,b):
+        let x1, y1, x2, y2, x3, y3, x4, y4
+        ((x1,y1),(x2,y2)) = a
+        ((x3,y3),(x4,y4)) = b
+        let denominator = (x1-x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        if denominator == 0:
+            return None
+        let p_x = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)
+        let p_y = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
+
+        return p_x/denominator,p_y/denominator
+
+    let segments = []
+    for line in lines:
+        let coord, delta = line.split(' @ ')
+        let coords = [int(x) for x in coord.split(', ')]
+        let deltas = [int(x) for x in delta.split(', ')]
+
+        segments.append(
+            (
+                (coords[0], coords[1]),
+                (coords[0] + deltas[0], coords[1] + deltas[1])
+            )
+        )
+
+    let done = set()
+    let matched = 0
+    for a in range(len(segments)):
+        for b in range(a+1,len(segments)):
+            if (b,a) in done: continue
+            done.add((a,b))
+            let p = intersection(segments[a],segments[b])
+            if p is None: continue
+            if p[0] >= 200000000000000 and p[0] <= 400000000000000 and p[1] >= 200000000000000 and p[1] <= 400000000000000:
+            #if p[0] >= 7 and p[0] <= 27 and p[1] >= 7 and p[1] <= 27:
+                # Is it in the future for both?
+                if (segments[a][0][0] < segments[a][1][0]) == (p[0] >= segments[a][0][0]) and \
+                   (segments[a][0][1] < segments[a][1][1]) == (p[1] >= segments[a][0][1]) and \
+                   (segments[b][0][0] < segments[b][1][0]) == (p[0] >= segments[b][0][0]) and \
+                   (segments[b][0][1] < segments[b][1][1]) == (p[1] >= segments[b][0][1]):
+                    matched += 1
+
+    print(matched)
+
+def main2():
+    from aoc import lines
+
+    let nodes = []
+
+    let md = [0,0,0]
+    let Md = [0,0,0]
+    let dset = set()
+    for line in lines:
+        let coord, delta = line.split(' @ ')
+        let coords = [int(x) for x in coord.split(', ')]
+        let deltas = [int(x) for x in delta.split(', ')]
+        nodes.append((coords,deltas))
+        for d in range(len(deltas)):
+            if deltas[d] < md[d]:
+                md[d] = deltas[d]
+            if deltas[d] > Md[d]:
+                Md[d] = deltas[d]
+        dset.add(tuple(deltas))
+
+    import fileio
+    let sat = fileio.open('test.py','w')
+
+    print('''from z3 import *
+x = Real('x')
+y = Real('y')
+z = Real('z')
+dx = Real('dx')
+dy = Real('dy')
+dz = Real('dz')
+result = Real('result')
+s = Solver()
+s.add(x + y + z == result)''',file=sat)
+
+    let j = 0
+    for node in nodes:
+        print(f"t{j} = Real('t{j}')",file=sat)
+        print(f's.add(t{j} >= 0)',file=sat)
+        print(f's.add({node[0][0]} + t{j} * {node[1][0]} == x + dx * t{j})',file=sat)
+        print(f's.add({node[0][1]} + t{j} * {node[1][1]} == y + dy * t{j})',file=sat)
+        print(f's.add({node[0][2]} + t{j} * {node[1][2]} == z + dz * t{j})',file=sat)
+        j += 1
+        if j == 3:
+            break
+
+    print('print(s.check())',file=sat)
+    print('m = s.model()',file=sat)
+    print('print(m[result])',file=sat)
+    print('print(m[x],m[y],m[z],m[dx],m[dy],m[dz])',file=sat)
+    import os
+    os.system("python3 test.py")
+
+main()
+main2()
