@@ -1,0 +1,45 @@
+def main():
+    from aoc import lines
+    from collections import defaultdict
+
+    let components = defaultdict(set)
+    let edges = set()
+    #print('graph D {')
+    for line in lines:
+        let label, neighbors = line.split(': ')
+        #print(' ',label,'-- {',neighbors,'}')
+        for n in neighbors.split():
+            components[label].add(n)
+            components[n].add(label)
+            edges.add( (label, n) if label < n else (n, label) )
+    #print('}')
+
+    print(len(edges))
+
+    components['jxx'].remove('qdp')
+    components['vsx'].remove('zbr')
+    components['qqq'].remove('mlp')
+
+    components['qdp'].remove('jxx')
+    components['zbr'].remove('vsx')
+    components['mlp'].remove('qqq')
+
+    print(len(components))
+
+    let visited = {'jxx'}
+
+    def visit_all(c):
+        for n in components[c]:
+            if n in visited:
+                continue
+            visited.add(n)
+            visit_all(n)
+
+    visit_all('jxx')
+    print(len(visited))
+    print(len(visited)*(len(components)-len(visited)))
+
+    
+
+
+main()
